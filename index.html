@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GnomosIA - Sua IA amiga para tudo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f0e8; color: #2c1810; }
+  body.dark { background: #1a1a2e; color: #f0e8d0; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(245,240,232,0.95); backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e8ddd0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; height: 56px;
+  }
+  body.dark nav { background: rgba(26,26,46,0.95); border-color: #2a3a5c; }
+
+  .logo { display: flex; align-items: center; gap: 8px; cursor: pointer; background: none; border: none; }
+  .logo-text { font-weight: 800; font-size: 18px; color: #6b8f3e; }
+
+  .nav-btns { display: flex; gap: 4px; align-items: center; }
+  .nav-btn {
+    background: transparent; border: none; border-radius: 20px;
+    padding: 6px 12px; cursor: pointer; font-size: 13px;
+    font-weight: 600; color: #6b5b4e;
+  }
+  .nav-btn.active { background: #6b8f3e; color: #fff; }
+  body.dark .nav-btn { color: #a0b0c0; }
+  .dark-btn {
+    background: none; border: 1px solid #e8ddd0; border-radius: 20px;
+    padding: 6px 10px; cursor: pointer; font-size: 14px;
+  }
+  body.dark .dark-btn { border-color: #2a3a5c; }
+
+  .page { display: none; padding-top: 56px; min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* HOME */
+  .hero {
+    min-height: calc(100vh - 56px);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 40px 20px; text-align: center;
+    background: radial-gradient(ellipse at top, #e8f5d0 0%, #f5f0e8 70%);
+  }
+  body.dark .hero { background: radial-gradient(ellipse at top, #0f3460 0%, #1a1a2e 70%); }
+
+  .gnome-circle {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: #e8f5d0; border: 4px solid #6b8f3e;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 70px; margin: 0 auto 20px;
+    box-shadow: 0 8px 32px #6b8f3e44;
+    animation: float 3s ease-in-out infinite;
+  }
+  body.dark .gnome-circle { background: #0f3460; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+
+  h1 { font-size: clamp(36px,8vw,64px); font-weight: 900; color: #6b8f3e; letter-spacing: -2px; margin-bottom: 8px; }
+  h1 span { color: #c0392b; }
+  .slogan { font-size: clamp(15px,4vw,20px); color: #6b5b4e; font-style: italic; margin-bottom: 32px; }
+  body.dark .slogan { color: #a0b0c0; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6b8f3e, #4a6b2a);
+    color: #fff; border: none; border-radius: 50px;
+    padding: 16px 36px; font-size: 16px; font-weight: 700;
+    cursor: pointer; box-shadow: 0 4px 20px #6b8f3e66;
+    transition: transform 0.2s; margin: 4px;
+  }
+  .btn-primary:hover { transform: scale(1.05); }
+  .btn-sec {
+    background: transparent; border: 2px solid #e8ddd0;
+    border-radius: 50px; padding: 16px 28px;
+    font-size: 16px; font-weight: 600; cursor: pointer; color: #6b5b4e; margin: 4px;
+  }
+  body.dark .btn-sec { border-color: #2a3a5c; color: #a0b0c0; }
+
+  .tags { display: flex; gap: 8px; margin-top: 32px; flex-wrap: wrap; justify-content: center; }
+  .tag {
+    background: #fff; border: 1px solid #e8ddd0; border-radius: 20px;
+    padding: 6px 14px; font-size: 13px; color: #6b5b4e;
+  }
+  body.dark .tag { background: #0f3460; border-color: #2a3a5c; color: #a0b0c0; }
+
+  .stats {
+    display: flex; background: #fff;
+    border-top: 1px solid #e8ddd0; border-bottom: 1px solid #e8ddd0;
+    flex-wrap: wrap;
+  }
+  body.dark .stats { background: #16213e; border-color: #2a3a5c; }
+  .stat { flex: 1 1 100px; padding: 20px 16px; text-align: center; border-right: 1px solid #e8ddd0; }
+  body.dark .stat { border-color: #2a3a5c; }
+  .stat-n { font-size: 26px; font-weight: 900; color: #6b8f3e; }
+  .stat-l { font-size: 12px; color: #6b5b4e; margin-top: 2px; }
+  body.dark .stat-l { color: #a0b0c0; }
+
+  /* ABOUT */
+  .about-inner { max-width: 600px; margin: 0 auto; padding: 24px 16px 40px; }
+  .about-title { text-align: center; margin-bottom: 24px; }
+  .about-title h2 { font-size: 26px; font-weight: 800; margin: 8px 0 4px; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card {
+    background: #fff8f0; border-radius: 16px; padding: 16px;
+    border: 1px solid #e8ddd0; transition: transform 0.2s;
+  }
+  body.dark .card { background: #0f3460; border-color: #2a3a5c; }
+  .card:hover { transform: translateY(-2px); }
+  .card-icon { font-size: 26px; margin-bottom: 6px; }
+  .card-title { font-weight: 700; font-size: 14px; }
+  .card-desc { font-size: 12px; color: #6b5b4e; margin-top: 2px; }
+  body.dark .card-desc { color: #a0b0c0; }
+  .free-box {
+    margin-top: 20px; border-radius: 16px; padding: 20px; text-align: center;
+    background: linear-gradient(135deg, #6b8f3e22, #c0392b11);
+    border: 1px solid #6b8f3e44;
+  }
+  .free-box p { font-weight: 600; margin: 8px 0 4px; }
+  .free-box small { color: #6b5b4e; font-size: 13px; }
+  body.dark .free-box small { color: #a0b0c0; }
+
+  /* CHAT */
+  #chat-page {
+    display: none; flex-direction: column;
+    height: 100vh; padding-top: 56px;
+  }
+  #chat-page.active { display: flex; }
+
+  .chat-header {
+    background: #fff; border-bottom: 1px solid #e8ddd0;
+    padding: 12px 16px; display: flex; align-items: center;
+    justify-content: space-between; flex-shrink: 0;
+  }
+  body.dark .chat-header { background: #16213e; border-color: #2a3a5c; }
+  .chat-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, #6b8f3e, #4a6b2a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; position: relative; flex-shrink: 0;
+  }
+  .online-dot {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 10px; height: 10px; background: #2ecc71;
+    border-radius: 50%; border: 2px solid #fff;
+  }
+  .chat-info { margin-left: 10px; }
+  .chat-name { font-weight: 700; font-size: 14px; }
+  .chat-status { font-size: 11px; color: #2ecc71; }
+  .clear-btn {
+    background: none; border: 1px solid #e8ddd0; border-radius: 20px;
+    padding: 6px 12px; cursor: pointer; font-size: 12px; color: #6b5b4e;
+  }
+  body.dark .clear-btn { border-color: #2a3a5c; color: #a0b0c0; }
+
+  .messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .msg-row { display: flex; align-items: flex-end; gap: 8px; }
+  .msg-row.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, #6b8f3e, #4a6b2a);
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .bubble {
+    max-width: 75%; padding: 10px 14px; font-size: 14px;
+    line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+  }
+  .bubble.bot {
+    background: #f0f8e8; border: 1px solid #e8ddd0;
+    border-radius: 18px 18px 18px 4px; color: #2c1810;
+  }
+  body.dark .bubble.bot { background: #1e3a5f; border-color: #2a3a5c; color: #f0e8d0; }
+  .bubble.user {
+    background: #6b8f3e; color: #fff;
+    border-radius: 18px 18px 4px 18px;
+  }
+  .msg-time { font-size: 10px; color: #6b5b4e; margin-top: 3px; }
+  body.dark .msg-time { color: #a0b0c0; }
+  .time-user { text-align: right; }
+
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #6b8f3e;
+    animation: bounce 1s ease-in-out infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+  .suggestions {
+    padding: 8px 16px; display: flex; gap: 8px;
+    overflow-x: auto; flex-shrink: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sugg-btn {
+    background: #fff8f0; border: 1px solid #e8ddd0; border-radius: 20px;
+    padding: 8px 14px; white-space: nowrap; font-size: 12px;
+    color: #6b5b4e; cursor: pointer; flex-shrink: 0;
+  }
+  body.dark .sugg-btn { background: #0f3460; border-color: #2a3a5c; color: #a0b0c0; }
+
+  .input-area {
+    background: #fff; border-top: 1px solid #e8ddd0;
+    padding: 12px 16px; flex-shrink: 0;
+  }
+  body.dark .input-area { background: #16213e; border-color: #2a3a5c; }
+  .input-box {
+    display: flex; gap: 8px; align-items: flex-end;
+    background: #f5f0e8; border-radius: 24px;
+    border: 1px solid #e8ddd0; padding: 6px 6px 6px 16px;
+  }
+  body.dark .input-box { background: #1a1a2e; border-color: #2a3a5c; }
+  #msg-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #2c1810; font-size: 15px; line-height: 1.4;
+    resize: none; max-height: 100px; overflow: auto;
+    font-family: inherit;
+  }
+  body.dark #msg-input { color: #f0e8d0; }
+  #msg-input::placeholder { color: #6b5b4e; }
+  body.dark #msg-input::placeholder { color: #a0b0c0; }
+  .send-btn {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: #6b8f3e; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: background 0.2s; color: white;
+  }
+  .send-btn:disabled { background: #e8ddd0; cursor: default; }
+  body.dark .send-btn:disabled { background: #2a3a5c; }
+  .input-footer { text-align: center; font-size: 10px; color: #6b5b4e; margin-top: 6px; }
+  body.dark .input-footer { color: #a0b0c0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="logo" onclick="showPage('home')">
+    <span>🍄</span>
+    <span class="logo-text">GnomosIA</span>
+  </button>
+  <div class="nav-btns">
+    <button class="nav-btn active" id="btn-home" onclick="showPage('home')">🏠</button>
+    <button class="nav-btn" id="btn-chat" onclick="showPage('chat')">💬</button>
+    <button class="nav-btn" id="btn-about" onclick="showPage('about')">✨</button>
+    <button class="dark-btn" onclick="toggleDark()">🌙</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="page active" id="home-page">
+  <div class="hero">
+    <div class="gnome-circle">🧙</div>
+    <h1>Gnomos<span>IA</span></h1>
+    <p class="slogan">"Sua IA amiga para tudo." 🍄</p>
+    <div>
+      <button class="btn-primary" onclick="showPage('chat')">💬 Começar Agora</button>
+      <button class="btn-sec" onclick="showPage('about')">✨ O que eu faço?</button>
+    </div>
+    <div class="tags">
+      <span class="tag">💬 Chat</span>
+      <span class="tag">🌐 Tradução</span>
+      <span class="tag">✍️ Histórias</span>
+      <span class="tag">💻 Código</span>
+      <span class="tag">📚 Estudos</span>
+      <span class="tag">💡 Ideias</span>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-n">∞</div><div class="stat-l">Mensagens grátis</div></div>
+    <div class="stat"><div class="stat-n">14+</div><div class="stat-l">Capacidades</div></div>
+    <div class="stat"><div class="stat-n">100%</div><div class="stat-l">Gratuito</div></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div class="page" id="about-page">
+  <div class="about-inner">
+    <div class="about-title">
+      <span style="font-size:48px">🧙</span>
+      <h2>O que a GnomosIA faz?</h2>
+      <p style="color:#6b5b4e;font-size:15px">Uma IA amiga, gratuita e ilimitada pra te ajudar com tudo!</p>
+    </div>
+    <div class="cards">
+      <div class="card"><div class="card-icon">💬</div><div class="card-title">Conversar</div><div class="card-desc">Bate-papo amigável sobre qualquer assunto</div></div>
+      <div class="card"><div class="card-icon">📚</div><div class="card-title">Lição de Casa</div><div class="card-desc">Ajuda com matérias escolares e explicações</div></div>
+      <div class="card"><div class="card-icon">✍️</div><div class="card-title">Histórias</div><div class="card-desc">Cria contos, poemas e músicas criativas</div></div>
+      <div class="card"><div class="card-icon">🌐</div><div class="card-title">Traduzir</div><div class="card-desc">Traduz textos para qualquer idioma</div></div>
+      <div class="card"><div class="card-icon">💡</div><div class="card-title">Ideias</div><div class="card-desc">Brainstorm e ideias criativas para projetos</div></div>
+      <div class="card"><div class="card-icon">💻</div><div class="card-title">Programação</div><div class="card-desc">Ajuda com código e solução de bugs</div></div>
+      <div class="card"><div class="card-icon">📝</div><div class="card-title">Resumos</div><div class="card-desc">Resume textos longos rapidamente</div></div>
+      <div class="card"><div class="card-icon">🎓</div><div class="card-title">Estudos</div><div class="card-desc">Flashcards, revisão e mapas mentais</div></div>
+    </div>
+    <div class="free-box">
+      <div style="font-size:32px">🍄</div>
+      <p>100% Gratuito e Ilimitado</p>
+      <small>Sem cadastro obrigatório. Sem limites de mensagens. Pra todo mundo!</small><br>
+      <button class="btn-primary" style="margin-top:12px" onclick="showPage('chat')">💬 Conversar agora</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="page" id="chat-page">
+  <div class="chat-header">
+    <div style="display:flex;align-items:center">
+      <div class="chat-avatar">🧙<span class="online-dot"></span></div>
+      <div class="chat-info">
+        <div class="chat-name">GnomosIA</div>
+        <div class="chat-status">● Online agora</div>
+      </div>
+    </div>
+    <button class="clear-btn" onclick="clearChat()">🗑️ Limpar</button>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="suggestions" id="suggestions">
+    <button class="sugg-btn" onclick="setSugg('Me conta uma piada 😄')">Me conta uma piada 😄</button>
+    <button class="sugg-btn" onclick="setSugg('Traduz Hello World para japonês')">Traduz Hello World 🌐</button>
+    <button class="sugg-btn" onclick="setSugg('Como faço um loop em Python?')">Loop em Python 💻</button>
+    <button class="sugg-btn" onclick="setSugg('Crie um poema sobre o verão')">Poema de verão ✍️</button>
+  </div>
+
+  <div class="input-area">
+    <div class="input-box">
+      <textarea id="msg-input" rows="1" placeholder="Escreva sua mensagem..."></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+    <div class="input-footer">GnomosIA · IA gratuita e ilimitada 🍄</div>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `Você é a GnomosIA, uma assistente de IA amigável, divertida e inteligente. Você se inspira em gnomos de desenho animado — simpática, acolhedora e sempre pronta pra ajudar. Responda sempre em português brasileiro, de forma clara, calorosa e com um toque de humor fofo quando apropriado. Use emojis com moderação. Você pode ajudar com: perguntas gerais, lição de casa, histórias, poemas, músicas, programação, traduções, resumos, ideias criativas e muito mais.`;
+
+let chatHistory = [];
+let isDark = false;
+
+const welcomeTime = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+
+function init() {
+  addBotMsg("Oi! 👋 Sou a GnomosIA, sua assistente amiga! Estou aqui pra te ajudar com qualquer coisa — perguntas, histórias, código, resumos, traduções e muito mais. Como posso te ajudar hoje? 🍄", welcomeTime);
+}
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  const pg = document.getElementById(p + '-page');
+  if (pg) pg.classList.add('active');
+  const btn = document.getElementById('btn-' + p);
+  if (btn) btn.classList.add('active');
+}
+
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('dark', isDark);
+  document.querySelector('.dark-btn').textContent = isDark ? '☀️' : '🌙';
+}
+
+function addBotMsg(text, time) {
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row';
+  row.innerHTML = `
+    <div class="msg-avatar">🧙</div>
+    <div>
+      <div class="bubble bot">${text}</div>
+      <div class="msg-time">${time}</div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMsg(text, time) {
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row user';
+  row.innerHTML = `
+    <div>
+      <div class="bubble user">${text}</div>
+      <div class="msg-time time-user">${time}</div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  document.getElementById('suggestions').style.display = 'none';
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row'; row.id = 'typing-row';
+  row.innerHTML = `
+    <div class="msg-avatar">🧙</div>
+    <div class="bubble bot">
+      <div class="typing-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>`;
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typing-row');
+  if (t) t.remove();
+}
+
+function setSugg(text) {
+  document.getElementById('msg-input').value = text;
+  document.getElementById('msg-input').focus();
+}
+
+function clearChat() {
+  document.getElementById('messages').innerHTML = '';
+  chatHistory = [];
+  document.getElementById('suggestions').style.display = 'flex';
+  init();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msg-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  addUserMsg(text, time);
+  input.value = '';
+  input.style.height = 'auto';
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true; btn.textContent = '⏳';
+
+  chatHistory.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Ops, tenta de novo! 🍄';
+    hideTyping();
+    chatHistory.push({ role: 'assistant', content: reply });
+    const replyTime = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    addBotMsg(reply, replyTime);
+  } catch(e) {
+    hideTyping();
+    addBotMsg('Eita! Problema na conexão 😅 Tenta de novo!', time);
+  }
+
+  btn.disabled = false; btn.textContent = '➤';
+}
+
+document.getElementById('msg-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+document.getElementById('msg-input').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+init();
+</script>
+</body>
+</html>
