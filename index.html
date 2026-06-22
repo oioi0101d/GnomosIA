@@ -290,6 +290,7 @@ async function sendMessage() {
       })
     });
     const data = await res.json();
+alert(JSON.stringify(data));
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Ops, tenta de novo! 🍄';
     hideTyping();
     chatHistory.push({ role: 'model', parts: [{ text: reply }] });
