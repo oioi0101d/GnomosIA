@@ -290,7 +290,7 @@ async function sendMessage() {
       })
     });
     const data = await res.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Ops, tenta de novo! 🍄';
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || JSON.stringify(data);
     hideTyping();
     chatHistory.push({ role: 'model', parts: [{ text: reply }] });
     const replyTime = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
